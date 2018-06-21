@@ -10,7 +10,7 @@ classdef PowerGraphics
             hold on;
             plot(0:1:23, load_rate(branch, :).*100, 'b');
             a = num2str(branch);
-            title(['Load rate on branch ' '' a]);
+            %title(['Load rate on branch ' '' a]);
             xlabel('Hour');
             ylabel('Rate, %');
             xlim([0, 23])
@@ -22,7 +22,7 @@ classdef PowerGraphics
             hold on;
             bar(0.5:1:23.5, cons_bus(node, :), 1, 'b');
             a = num2str(node);
-            title(['Consumption in node ' '' a]);
+            %title(['Consumption in node ' '' a]);
             xlabel('Hour');
             ylabel('Load, MW');
             xlim([0, 24])
@@ -33,11 +33,12 @@ classdef PowerGraphics
             hold on;
             plot(0:1:23, gen(number, :), 'r');
             a = num2str(number);
-            title(['Load rate on branch ' '' a]);
-            xlabel('Hour');
-            ylabel('Power, MW');
+            title(['Generation on plant ' '' a]);
+            xlabel('Hour','FontSize', 14,'fontname', 'Times New Roman');
+            ylabel('Power, MW','FontSize', 14,'fontname', 'Times New Roman');
             xlim([0, 23]);
             ylim([0, max(gen(number, :))*1.1]);
+            set(gca,'FontSize',14)
             grid on;
         end 
         
@@ -89,17 +90,19 @@ classdef PowerGraphics
         function graph_cost(obj, cost)
             hold on;
             plot(1:1:24, cost, 'b');
-            xlabel('Hour');
-            ylabel('MW cost, u/MW');
+            xlabel('Hour','FontSize', 14,'fontname', 'Times New Roman');
+            ylabel('MW cost, $/MW','FontSize', 14,'fontname', 'Times New Roman');
             xlim([0, 24])
+            ylim([0, 15])
+            set(gca,'FontSize',14)
             grid on;
         end
         
         function graph_loss(obj, loss)
             hold on;
             plot(1:1:24, loss, 'b');
-            xlabel('Hour');%,'FontSize', 14,'fontname', 'Times New Roman');
-            ylabel('Losses, MW');
+            xlabel('Hour','FontSize', 14,'fontname', 'Times New Roman');%,'FontSize', 14,'fontname', 'Times New Roman');
+            ylabel('Losses, MW','FontSize', 14,'fontname', 'Times New Roman');
             %'FontSize', 14,'fontname', 'Times New Roman');
             xlim([0, 24])
             grid on;

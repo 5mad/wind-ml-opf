@@ -18,10 +18,13 @@ classdef PowerSystem
     methods
         function obj = loadcase(obj)
             obj.model = loadcase(obj.case_number);
-            obj.model.gencost(:, 4) = 2; %4 column - polynoms
-            obj.model.gencost(:, 5) = [];%delete 3rd polynom
-            obj.model.gencost(:,5:6) = obj.model.gencost(:,5:6)./...
-                ([obj.model.gen(:, 9) obj.model.gen(:, 9)] ./1000);
+            %obj.model.gencost(:, 4) = 2; %4 column - polynoms
+            %obj.model.gencost(:, 5) = [];%delete 3rd polynom
+            %obj.model.gencost(:,5:6) = obj.model.gencost(:,5:6)./...
+            %    ([obj.model.gen(:, 9) obj.model.gen(:, 9)] ./1000);
+            gen_data = csvread('prices.csv', 1);
+            obj.model.gen(:,9:10) = gen_data(:,9:10);
+            obj.model.gencost(:,5:7) = gen_data(:,[13,12,11]);
             obj.load = obj.model.bus(:, 3:4);
         end
         
@@ -30,7 +33,7 @@ classdef PowerSystem
                 1.01 100 1 power 0]; %1:10 for GEN_BUS:PMIN
             obj.model.bus(node, 2) = 2; %2 for BUS_TYPE
             %obj.model.bus(31, 2) = 2; %balance node -> load bus
-            obj.model.gencost(ng, :) = [2 0 0 2 0.005*ng 0.003*ng];%cost
+            obj.model.gencost(ng, :) = [2 0 0 3 0 0 0];%cost
         end
         
         function obj = load_change(obj, hour)

@@ -2,7 +2,7 @@
 clc;
 
 %Initial data for wind turbine
-wind_data = csvread('wind_dataset.csv');
+%wind_data = csvread('wind_dataset.csv');
 catboost_p = csvread('testout.csv');
 catboost_p = reshape(catboost_p(1:end-19,:),[316,24]);
 wind = windTurbine;
@@ -22,18 +22,27 @@ system = system.loadcase();
 number_branch = size(system.model.branch, 1);
 flow = zeros(number_branch, 24);
 ng = size(system.model.gen, 1);
-gen = zeros(ng+length(wind_nodes),24);
 loss = zeros(1, 24);
 cost = zeros(1, 24);
 
+INCLUDE_WIND = 0;
+
+if INCLUDE_WIND
+    gen = zeros(ng+length(wind_nodes),24);
+else
+    gen = zeros(ng,24);
+end
+
 %Modelling
 for hour = 1:24
-    %p_el = Power(wind, wind_data(1, hour)) * 100;
-    p_el = catboost_p(1, hour) * 100;
-    num_gen = ng;
-    for node = wind_nodes
-        num_gen = num_gen + 1;
-        system = system.insert_gen(num_gen, node, p_el*num_gen/10);
+    if INCLUDE_WIND
+        %p_el = Power(wind, wind_data(1, hour)) * 100;
+        p_el = catboost_p(1, hour) * 1000;
+        num_gen = ng;
+        for node = wind_nodes
+            num_gen = num_gen + 1;
+            system = system.insert_gen(num_gen, node, p_el*num_gen/10);
+        end
     end
     system = system.load_change(hour);
     results = system.opf();
@@ -43,8 +52,9 @@ for hour = 1:24
     end
     gen(:, hour) = results.gen(:, 2);
     loss(hour) = real(sum(get_losses(results)));
-    cost(hour) = (sum(results.gen(:, 2) .* results.gencost(:, 5))...
-        +sum(results.gencost(:, 6)))/sum(results.gen(:, 2));
+    cost(hour) = (sum(results.gen(:, 2) .* results.gencost(:, 5).^2) +...
+        sum(results.gen(:, 2) .* results.gencost(:, 6))+...
+        sum(results.gencost(:, 7)))/sum(results.gen(:, 2));
 end
 
 %Data
@@ -53,6 +63,7 @@ cons_bus = system.consumption();
 
 %%
 graph = PowerGraphics;
+%%
 figure;
 graph.graph_cons(cons_bus, 3);
 %%
@@ -60,7 +71,7 @@ figure;
 graph.graph_loadrate(load_rate, 3);
 %%
 figure;
-graph.graph_generation(gen, 1);
+graph.graph_generation(gen, 3);
 %%
 figure;
 graph_saturated(graph, load_rate);
